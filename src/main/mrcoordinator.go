@@ -13,7 +13,7 @@ import "6.5840/mr"
 import "time"
 import "os"
 import "fmt"
-
+import "log"
 func main() {
 	if len(os.Args) < 2 {
 		fmt.Fprintf(os.Stderr, "Usage: mrcoordinator inputfiles...\n")
@@ -25,5 +25,6 @@ func main() {
 		time.Sleep(time.Second)
 	}
 
+	log.Printf("All tasks done\n")
 	time.Sleep(time.Second)
 }

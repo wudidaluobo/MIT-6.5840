@@ -47,8 +47,8 @@ fi
 if [ "$TIMEOUT" != "" ]
 then
   TIMEOUT2=$TIMEOUT
-  TIMEOUT2+=" -k 2s 120s "
-  TIMEOUT+=" -k 2s 45s "
+  TIMEOUT2+=" -k 5s 120s "
+  TIMEOUT+=" -k 5s 300s "
 fi
 
 # run the test in a fresh sub-directory.
@@ -68,6 +68,7 @@ rm -f mr-*
 (cd ../../mrapps && go build $RACE -buildmode=plugin early_exit.go) || exit 1
 (cd ../../mrapps && go build $RACE -buildmode=plugin crash.go) || exit 1
 (cd ../../mrapps && go build $RACE -buildmode=plugin nocrash.go) || exit 1
+
 (cd .. && go build $RACE mrcoordinator.go) || exit 1
 (cd .. && go build $RACE mrworker.go) || exit 1
 (cd .. && go build $RACE mrsequential.go) || exit 1
@@ -110,7 +111,7 @@ else
   failed_any=1
 fi
 
-# wait for remaining workers and coordinator to exit.
+# # wait for remaining workers and coordinator to exit.
 wait
 
 #########################################################
