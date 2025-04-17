@@ -1,6 +1,11 @@
 package lock
 
 import (
+	// "log"
+
+	
+
+	"6.5840/kvsrv1/rpc"
 	"6.5840/kvtest1"
 )
 
@@ -10,6 +15,8 @@ type Lock struct {
 	// Put and Get.  The tester passes the clerk in when calling
 	// MakeLock().
 	ck kvtest.IKVClerk
+	ClientID string
+    LockName string 
 	// You may add code here
 }
 
@@ -20,14 +27,45 @@ type Lock struct {
 // precisely what the lock state is).
 func MakeLock(ck kvtest.IKVClerk, l string) *Lock {
 	lk := &Lock{ck: ck}
-	// You may add code here
+	lk.LockName=l
+	lk.ClientID=kvtest.RandValue(8)
 	return lk
 }
 
 func (lk *Lock) Acquire() {
 	// Your code here
+	for{
+		val,ver,err:=lk.ck.Get(lk.LockName)
+		//没有对应的锁
+		if err==rpc.ErrNoKey{
+			ok:=lk.ck.Put(lk.LockName,lk.ClientID,0)
+		    if ok==rpc.OK||ok==rpc.ErrMaybe{
+				break
+			}
+		}else if err==rpc.OK{
+			//有对应的锁
+			if val==""{
+				ok:=lk.ck.Put(lk.LockName,lk.ClientID,ver)
+				if ok==rpc.OK{
+					break
+				}
+			}else if val!=lk.ClientID{
+				continue
+			}else if val==lk.ClientID{
+				break
+			}
+		}		
+	}
+	
 }
 
 func (lk *Lock) Release() {
 	// Your code here
+	val,ver,err:=lk.ck.Get(lk.LockName)
+	// log.Printf("Release:val=%v,ver=%v,err=%v,lk.ClientID:%v",val,ver,err,lk.ClientID)
+	if err==rpc.OK{
+		if val==lk.ClientID{
+			lk.ck.Put(lk.LockName,"",ver)
+		}
+	}
 }
